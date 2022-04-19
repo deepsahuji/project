@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<head>
+<!--css Declaration -->
+
+<style>
+input[id='pinvalidator']{
+width:220px;
+height:30px;
+}
+input[id='submitbtn']{
+background-color: #f44336; 
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 14px;
+
+}
+#container{
+ margin-top: 100px;
+text-align:center;
+padding-top:20px;
+padding-bottom:20px;
+margin-left:20px;
+background-color:#F9F9F9;
+display:none;
+width:400px;
+}
+
+.or{
+margin-top:15px;
+}
+#close-button{
+margin-left:290px;
+}
+input[id='locationbtn']{
+background-color: #f44336; 
+  border: none;
+  color: white;
+  padding: 13px 30px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 14px;
+}
+#demo{
+color:orange;
+font-size:26px;
+font-style:bold;
+}
+#close-button{
+background-color:#f44336; 
+color: white;
+border:none;
+font-size:30px;
+padding:6px 6px 6px 6px;
+}
+
+#popup{
+background-color:#ffffff;
+color:#000000;
+border:none;
+}
+</style>
+</head>
+<body style="z-index:4;">
+
+<button id="popup" onclick="bttn()">Location Picker</button>
+
+<div id="container">
+<forms>
+ <button onclick="closes()" id="close-button">&times;</button>
+
+<h1 style="color:grey;text-align:center;">Delivery <span style="color:#f44336;"> Checker:</span></h1>
+<input type="text" name="pinvalidator" placeholder="Enter Pincode" id="pinvalidator"><br><br>
+<input type="submit" name="validate" id="submitbtn" onclick="myFunction()" value="Check">
+<p id="demo"></p>
+</forms>
+<button onclick="getExactLocation()" id="detect-location">detect</button>
+</div>
+<script>
+  var apiKey = "AIzaSyBvJP_qHslhDHZC8t12BpRgJevmS3IBFYc"
+    function detectLocation(){
+        navigator.geolocation.getCurrentPosition(showPosition)
+    }
+  function getExactLocation() {
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+        console.log(this.responseText);
+        let latLon = JSON.parse(this.responseText)
+        getlocationPincodeByLatLon(latLon.location.lat+","+latLon.location.lng)
+      }
+    };
+    xhttp.open("POST", "https://www.googleapis.com/geolocation/v1/geolocate?key="+apiKey, true);
+    xhttp.send();
+  }
+
+  function getlocationPincodeByLatLon(latLon) {
+    let pincode,flag=true
+      var dileveryPincodes = ['470002','452001']
+      
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+        console.log(this.responseText);
+
+        // console.log(this.responseText);
+      var valueMap = JSON.parse(this.responseText)
+      //console.log(valueMap)
+      // console.log(valueMap.results[0].address_components)
+      for (const key in valueMap.results[0].address_components) {
+        if (valueMap.results[0].address_components.hasOwnProperty.call(valueMap.results[0].address_components, key)) {
+          // const element = object[key];
+           console.log(valueMap.results[0].address_components[key])
+          for (const code in valueMap.results[0].address_components[key].types) {
+            if (Object.hasOwnProperty.call(valueMap.results[0].address_components[key].types, code)) {
+              // console.log(valueMap.results[0].address_components[key].types[code]);
+              if("postal_code" === valueMap.results[0].address_components[key].types[code]){
+                console.log(valueMap.results[0].address_components[key].long_name)
+                pincode = valueMap.results[0].address_components[key].long_name;
+                flag = false
+                break;
+              }
+            }
+          }
+        }
+        if(!flag){
+          break;
+        }
+      }
+      if(dileveryPincodes.indexOf(pincode)!=-1){
+        document.getElementById("demo").innerHTML = "You Can Place Order";
+      }
+      else{
+        document.getElementById("demo").innerHTML = "Sorry, this service has not been Started in your Area";
+      }
+        
+      }
+    };
+    xhttp.open("GET", "https://maps.googleapis.com/maps/api/geocode/json?latlng="+latLon+"&key="+apiKey, true);
+    xhttp.send();
+  }
+
+
+  function getCode(latLon){
+      let pincode,flag=true
+      var dileveryPincodes = ['470002','452001']
+      var xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      // console.log(this.responseText);
+      var valueMap = JSON.parse(this.responseText)
+      //console.log(valueMap)
+      // console.log(valueMap.results[0].address_components)
+      for (const key in valueMap.results[0].address_components) {
+        if (valueMap.results[0].address_components.hasOwnProperty.call(valueMap.results[0].address_components, key)) {
+          // const element = object[key];
+           console.log(valueMap.results[0].address_components[key])
+          for (const code in valueMap.results[0].address_components[key].types) {
+            if (Object.hasOwnProperty.call(valueMap.results[0].address_components[key].types, code)) {
+              // console.log(valueMap.results[0].address_components[key].types[code]);
+              if("postal_code" === valueMap.results[0].address_components[key].types[code]){
+                console.log(valueMap.results[0].address_components[key].long_name)
+                pincode = valueMap.results[0].address_components[key].long_name;
+                flag = false
+                break;
+              }
+            }
+          }
+        }
+        if(!flag){
+          break;
+        }
+      }
+      if(dileveryPincodes.indexOf(pincode)!=-1){
+        document.getElementById("demo").innerHTML = "You Can Place Order";
+      }
+      else{
+        document.getElementById("demo").innerHTML = "Sorry, this service has not been Started in your Area";
+      }
+    }
+  };
+  xhttp.open("GET", "https://maps.googleapis.com/maps/api/geocode/json?latlng="+latLon+"&key=AIzaSyBvJP_qHslhDHZC8t12BpRgJevmS3IBFYc", true);
+  xhttp.send();    
+    }
+
+  function showPosition(response){
+        alert(response.coords.latitude +" "+response.coords.longitude)
+        console.log(response.coords.longitude)
+        console.log(response.coords.latitude)
+        console.log(response)
+        getCode(response.coords.latitude+","+response.coords.longitude)
+    }
+function bttn(){
+  document.getElementById("popup").style.display = "none";
+  document.getElementById("container").style.display ="block";
+}
+function closes(){
+console.log("Inside CLose")
+  document.getElementById("popup").style.display = "block";
+  document.getElementById("container").style.display ="none";
+}
+
+function myFunction()
+ {
+  var input = document.getElementById("pinvalidator");
+  console.log(input.value)
+   if(input.value=='470002'){
+   document.getElementById("demo").innerHTML = "You Can Place Order";
+     }
+   else{
+      document.getElementById("demo").innerHTML = "Sorry, this service has not been Started in your Area";
+     }
+}
+
+
+</script>
+</body>
+</html>
